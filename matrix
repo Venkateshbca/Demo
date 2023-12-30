@@ -1,0 +1,57 @@
+#include<stdio.h>
+#define MAX_VERTICES 10
+void inputGraph(int graph[MAX_VERTICES][MAX_VERTICES],int vertices,int edges)
+{
+    int i,j,v1,v2;
+    for (i=0;i<vertices;i++)
+    {
+        for (j=0;j<vertices;j++)
+        {
+            graph[i][j]=0;
+        }
+    }
+    printf("enter %d edges(vertex1 vertex2):\n",edges);
+    for(i=0;i<edges;i++)
+    {
+        scanf("%d%d",&v1,&v2);
+        graph[v1][v2]=1;
+        graph[v2][v1]=1;
+    }
+}
+void displayGraph(int graph[MAX_VERTICES][MAX_VERTICES],int vertices)
+{
+    int i,j;
+    printf("\nAdjacency Matrix:\n");
+    printf(" ");
+    for(i=0;i<vertices;i++)
+    {
+        printf("%d ",i);
+    }
+    printf("\n");
+    for(i=0;i<vertices;i++)
+    {
+        printf("%d ",i);
+        for(j=0;j<vertices;j++)
+        {
+            printf("%d ",graph[i][j]);
+        }
+        printf("\n");
+    }
+}
+int main()
+{
+    int vertices,edges;
+    printf("enter the number of vertices:");
+    scanf("%d",&vertices);
+    printf("enter the number of edges:");
+    scanf("%d",&edges);
+    if (vertices>MAX_VERTICES)
+    {
+        printf("Number of vertices wxceeds the maximum limit.\n");
+        return 1;
+    }
+    int graph[MAX_VERTICES][MAX_VERTICES];
+    inputGraph(graph,vertices,edges);
+    displayGraph(graph,vertices);
+    return 0;
+}
