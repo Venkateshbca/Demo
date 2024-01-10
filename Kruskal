@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for an edge
+struct Edge {
+    int src, dest, weight;
+};
+
+// Define the structure for a subset
+struct Subset {
+    int parent;
+    int rank;
+};
+
+// Define the function to find the parent of a node using path compression
+int find(struct Subset subsets[], int i) {
+    if (subsets[i].parent != i) {
+        subsets[i].parent = find(subsets, subsets[i].parent);
+    }
+    return subsets[i].parent;
+}
+
+// Define the function to perform union of two sets of x and y using union by rank
+void Union(struct Subset subsets[], int x, int y) {
+    int xRoot = find(subsets, x);
+    int yRoot = find(subsets, y);
+
+    if (subsets[xRoot].rank < subsets[yRoot].rank) {
+        subsets[xRoot].parent = yRoot;
+    } else if (subsets[xRoot].rank > subsets[yRoot].rank) {
+        subsets[yRoot].parent = xRoot;
+    } else {
+        subsets[yRoot].parent = xRoot;
+        subsets[xRoot].rank++;
+    }
+}
+
+// Define the function to implement Kruskal's algorithm
+void kruskal_algorithm(int num_vertices, struct Edge edges[], int num_edges) {
+    // Sort the edges in ascending order of their weights
+    for (int i = 0; i < num_edges - 1; i++) {
+        for (int j = 0; j < num_edges - i - 1; j++) {
+            if (edges[j].weight > edges[j + 1].weight) {
+                struct Edge temp = edges[j];
+                edges[j] = edges[j + 1];
+                edges[j + 1] = temp;
+            }
+        }
+    }
+
+    // Initialize the parent array
+    struct Subset *subsets = (struct Subset *) malloc(num_vertices * sizeof(struct Subset));
+    for (int i = 0; i < num_vertices; i++) {
+        subsets[i].parent = i;
+        subsets[i].rank = 0;
+    }
+
+    // Initialize the minimum spanning tree
+    struct Edge *minimum_spanning_tree = (struct Edge *) malloc((num_vertices - 1) * sizeof(struct Edge));
+    int minimum_spanning_tree_index = 0;
+
+    // Iterate over the edges
+    for (int i = 0; i < num_edges; i++) {
+        // Get the vertices and weight of the edge
+        int vertex_1 = edges[i].src;
+        int vertex_2 = edges[i].dest;
+        int weight = edges[i].weight;
+
+        // Find the parent of vertex_1
+        int parent_vertex_1 = find(subsets, vertex_1);
+
+        // Find the parent of vertex_2
+        int parent_vertex_2 = find(subsets, vertex_2);
+
+        // If the parents are not the same, add the edge to the minimum spanning tree
+        if (parent_vertex_1 != parent_vertex_2) {
+            minimum_spanning_tree[minimum_spanning_tree_index++] = edges[i];
+            Union(subsets, parent_vertex_1, parent_vertex_2);
+        }
+    }
+
+    // Print the minimum spanning tree
+    printf("Minimum Spanning Tree:\n");
+    for (int i = 0; i < num_vertices - 1; i++) {
+        printf("(%d, %d) -> %d\n", minimum_spanning_tree[i].src, minimum_spanning_tree[i].dest, minimum_spanning_tree[i].weight);
+    }
+
+    // Free the memory
+    free(subsets);
+    free(minimum_spanning_tree);
+}
+
+// Example usage
+int main() {
+    int num_vertices, num_edges;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &num_vertices);
+    printf("Enter the number of edges: ");
+    scanf("%d", &num_edges);
+    struct Edge *edges = (struct Edge *) malloc(num_edges * sizeof(struct Edge));
+    printf("Enter the edges in the format <source> <destination> <weight>:\n");
+    for (int i = 0; i < num_edges; i++) {
+        scanf("%d %d %d", &edges[i].src, &edges[i].dest, &edges[i].weight);
+    }
+    kruskal_algorithm(num_vertices, edges, num_edges);
+    free(edges);
+    return 0;
